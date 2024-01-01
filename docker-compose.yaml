@@ -7,10 +7,22 @@ services:
     working_dir: /app
     container_name: recommendation-system-python
     tty: true
-    command: ./manage.py runserver 0:8000
+    command: uwsgi --ini uwsgi.ini --py-autoreload 1
     build:
       context: .
       dockerfile: Dockerfile
       target: ${TARGET:-base-recommendation-system}
+    expose:
+      - "8000"
+  nginx:
+    image: nginx:1.23-alpine
+    volumes:
+      - ./:/app:delegated
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./host.conf:/etc/nginx/conf.d/host.conf
+      - ./uwsgi_params:/etc/nginx/uwsgi_params
     ports:
-      - "8000:8000"
+      - "80:8080"
+    working_dir: /app
+    depends_on:
+      - recommendation-system-python
