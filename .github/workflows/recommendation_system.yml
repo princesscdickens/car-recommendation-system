@@ -1,4 +1,4 @@
-name: Normalized API on Production
+name: Deploy Recommendation System
 
 on:
   workflow_dispatch
