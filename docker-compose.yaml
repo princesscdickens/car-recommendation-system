@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  recommendation-system-python:
+    image: recommendation-system:${TARGET:-base-recommendation-system}
+    volumes:
+      - ./:/app:delegated
+    working_dir: /app
+    container_name: recommendation-system-python
+    tty: true
+    command: ./manage.py runserver 0:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${TARGET:-base-recommendation-system}
+    ports:
+      - "8000:8000"
