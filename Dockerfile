@@ -1,5 +1,5 @@
 # Pull Python from official Docker repo
-FROM python:3.9.18 AS base-recommendation-system
+FROM python:latest AS base-recommendation-system
 
 COPY . ./
 

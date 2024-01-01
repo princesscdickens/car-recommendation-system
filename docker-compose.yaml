@@ -3,7 +3,7 @@ services:
   recommendation-system-python:
     image: recommendation-system:${TARGET:-base-recommendation-system}
     volumes:
-      - ./:/app:delegated
+      - ./:/app
     working_dir: /app
     container_name: recommendation-system-python
     tty: true
@@ -17,7 +17,7 @@ services:
   nginx:
     image: nginx:1.23-alpine
     volumes:
-      - ./:/app:delegated
+      - ./:/app
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./host.conf:/etc/nginx/conf.d/host.conf
       - ./uwsgi_params:/etc/nginx/uwsgi_params
