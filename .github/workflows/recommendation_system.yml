@@ -1,0 +1,37 @@
+name: Normalized API on Production
+
+on:
+  workflow_dispatch
+
+env:
+  URL_IMAGE_ECR: 423154430651.dkr.ecr.us-east-1.amazonaws.com/normalized.api:normalized-api-${{ github.sha }}
+  CLUSTER_NAME: recommendation-system
+
+jobs:
+  apply-terraform:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add profile credentials to ~/.aws/credentials
+        shell: bash
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile $AWS_PROFILE
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile $AWS_PROFILE
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
+
+      - name: Installing Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.5
+
+      - name: Terraform Init, Select Workspace, Plan and Apply
+        shell: bash
+        run: |
+          cd terraform
+          rm -rf .terraform*
+          terraform init
+          terraform apply -auto-approve

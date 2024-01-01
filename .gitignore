@@ -1,2 +1,6 @@
 .idea
 db.sqlite3
+
+# Terraform
+terraform/**/.terraform/*
+terraform/**/.terraform.lock.hcl
