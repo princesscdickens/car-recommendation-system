@@ -66,6 +66,10 @@ jobs:
 
       - name: Build image
         run: docker build --target prod-recommendation-system -t ${{ URL_IMAGE_ECR }} .
+        env:
+            URL_IMAGE_ECR: ${{ URL_IMAGE_ECR }}
 
       - name: Push to ECR
         run: docker push ${{ URL_IMAGE_ECR }}
+        env:
+            URL_IMAGE_ECR: ${{ URL_IMAGE_ECR }}
