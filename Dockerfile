@@ -12,6 +12,8 @@ FROM base-recommendation-system AS prod-recommendation-system
 
 WORKDIR /app
 
+CMD ["./manage.py", "migrate"]
+
 CMD ["uwsgi", "--ini", "uwsgi.ini"]
 
 # NGINX image for production
