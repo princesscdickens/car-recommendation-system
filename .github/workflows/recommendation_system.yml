@@ -5,7 +5,7 @@ on:
 
 env:
   URL_IMAGE_ECR: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:recommendation-system-${{ github.sha }}
-  CLUSTER_NAME: recommendation-system
+  CLUSTER_NAME: recommendation
 
 jobs:
   apply-terraform:
