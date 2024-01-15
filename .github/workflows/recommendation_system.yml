@@ -73,3 +73,47 @@ jobs:
         run: docker push $URL_IMAGE_ECR
         env:
             URL_IMAGE_ECR: ${{ env.URL_IMAGE_ECR }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: apply-terraform
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Add profile credentials to ~/.aws/credentials
+        shell: bash
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile $AWS_PROFILE
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile $AWS_PROFILE
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.25.2
+
+      - name: Replace placeholder by its env value
+        run: |
+          envsubst '$GITHUB_SHA,$CLUSTER_NAME' < $PATH_TO_K8S > ${PATH_TO_K8S}_temp
+          mv ${PATH_TO_K8S}_temp $PATH_TO_K8S
+        env:
+          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+          PATH_TO_K8S: k8s/car-recommendation-system.yml
+
+      - name: Update kubectl config
+        run: aws eks update-kubeconfig --name $CLUSTER_NAME --verbose --alias $CLUSTER_NAME --region $AWS_REGION --profile $AWS_PROFILE
+        env:
+          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
+
+      - name: Apply kubernetes
+        run: |
+          kubectl apply -f $PATH_TO_K8S
+        env:
+          PATH_TO_K8S: k8s/car-recommendation-system.yml
