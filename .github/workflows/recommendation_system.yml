@@ -5,6 +5,7 @@ on:
 
 env:
   URL_IMAGE_ECR: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:recommendation-system-${{ github.sha }}
+  URL_IMAGE_ECR_NGINX: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:nginx-${{ github.sha }}
   CLUSTER_NAME: recommendation
 
 jobs:
@@ -38,7 +39,7 @@ jobs:
           rm -rf .terraform*
           terraform init
           terraform apply -auto-approve
-  build-and-push:
+  build-and-push-app:
 
     runs-on: ubuntu-latest
     needs: apply-terraform
@@ -74,9 +75,46 @@ jobs:
         env:
             URL_IMAGE_ECR: ${{ env.URL_IMAGE_ECR }}
 
+  build-and-push-nginx:
+
+    runs-on: ubuntu-latest
+    needs: apply-terraform
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Add profile credentials to ~/.aws/credentials
+        shell: bash
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile $AWS_PROFILE
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile $AWS_PROFILE
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
+
+      - name: Login Docker into to Amazon ECR
+        run: aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | docker login --username AWS --password-stdin $URL_IMAGE_ECR
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          URL_IMAGE_ECR: ${{ env.URL_IMAGE_ECR_NGINX }}
+          AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
+
+      - name: Build image
+        run: docker build --target prod-nginx -t $URL_IMAGE_ECR .
+        env:
+            URL_IMAGE_ECR: ${{ env.URL_IMAGE_ECR_NGINX }}
+
+      - name: Push to ECR
+        run: docker push $URL_IMAGE_ECR
+        env:
+            URL_IMAGE_ECR: ${{ env.URL_IMAGE_ECR_NGINX }}
+
+
   deploy:
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: [build-and-push-app, build-and-push-nginx]
 
     steps:
       - name: Checkout Code

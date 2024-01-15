@@ -6,12 +6,25 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  name: recommendation-system-service
+  name: recommendation-system-python
+  namespace: recommendation-system
+spec:
+  selector:
+    app: recommendation-system-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-system-nginx
   namespace: recommendation-system
 spec:
   type: LoadBalancer
   selector:
-    app: recommendation-system-app
+    app: recommendation-system-nginx
   ports:
     - protocol: TCP
       port: 80
@@ -40,6 +53,31 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+            - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-system-nginx
+  labels:
+    app: recommendation-system-nginx
+  namespace: recommendation-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation-system-nginx
+  template:
+    metadata:
+      labels:
+        app: recommendation-system-nginx
+    spec:
+      containers:
+        - name: recommendation-system-nginx
+          image: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:nginx-$GITHUB_SHA
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
             - containerPort: 8080
 ---
 apiVersion: networking.k8s.io/v1
@@ -59,6 +97,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: recommendation-system-service
+                name: recommendation-system-nginx
                 port:
                   number: 80
