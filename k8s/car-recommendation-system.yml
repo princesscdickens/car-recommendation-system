@@ -47,6 +47,15 @@ spec:
       labels:
         app: recommendation-system-app
     spec:
+      initContainers:
+        - name: migrations
+          image: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:recommendation-system-$GITHUB_SHA
+          imagePullPolicy: Always
+          command: [ "/bin/sh" ]
+          args:
+            - -c
+            - >-
+              ./manage.py migrate
       containers:
         - name: recommendation-system-app
           image: 187443710069.dkr.ecr.us-east-1.amazonaws.com/recommendation.system.cars:recommendation-system-$GITHUB_SHA
