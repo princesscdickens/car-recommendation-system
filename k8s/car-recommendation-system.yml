@@ -13,7 +13,7 @@ spec:
     app: recommendation-system-app
   ports:
     - protocol: TCP
-      port: 80
+      port: 8000
       targetPort: 8000
 ---
 apiVersion: v1
