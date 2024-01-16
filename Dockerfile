@@ -12,7 +12,7 @@ FROM base-recommendation-system AS prod-recommendation-system
 
 WORKDIR /app
 
-CMD ["./manage.py", "migrate"]
+RUN ./manage.py migrate cars
 
 CMD ["uwsgi", "--ini", "uwsgi.ini"]
 
