@@ -20,8 +20,8 @@ def cars_list(request):
             'number_of_recommendations') else 5
 
         # Check if any parameter is missing
-        #if any(param is None for param in [make, model, year, msrp]):
-        #    return JsonResponse({'error': 'Missing one or more parameters: make, model, year, msrp'}, status=400)
+        if any(param is None for param in [make, model, year, msrp]):
+            return JsonResponse({'error': 'Missing one or more parameters: make, model, year, msrp'}, status=400)
 
         # Join them
         input_car_features = ' '.join([make, model, year, msrp])
