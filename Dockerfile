@@ -1,5 +1,5 @@
 # Pull Python from official Docker repo
-FROM python:3.11-slim AS base-recommendation-system
+FROM python:3.12.10 AS base-recommendation-system
 
 WORKDIR /app
 
