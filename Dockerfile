@@ -1,11 +1,13 @@
 # Pull Python from official Docker repo
-FROM python:latest AS base-recommendation-system
+FROM python:3.11-slim AS base-recommendation-system
 
 WORKDIR /app
 
 COPY . ./
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
 
 # Create image for production
 FROM base-recommendation-system AS prod-recommendation-system
